@@ -1,0 +1,253 @@
+<html>
+    <head>
+        <link rel="stylesheet"  type="text/css" href="{{url_for('.static', filename='style.css')}}">
+        {% if title %}
+        <title>{{ title }} - BLIP-A</title>
+        {% else %}
+        <title>BLIP-A</title>
+        {% endif %}
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.1/socket.io.min.js"></script>
+    </head>
+    <body>
+	<div class="topnav" id="myTopnav">
+  		<a href="#home" class="active">BLIP-A</a>
+  		<a href="#about">Status: {{Configuracion}}</a>
+                <a href="#about">IP: {{host_ip_address}}</a>
+  		<a id="datetime" href="datetime"></a>
+                <a id="Lat" href="datetime" contenteditable="true">Lat: {{latit}}</a>
+                <a id="Lon" href="datetime" contenteditable="true">Lon: {{longit}}</a>
+  		<a id="actualiza_latlon" href="actualiza_position" onclick=="nueva_latlon">Actualizar Lat/Lon</a>
+	</div>
+	<div class="row">
+		<div class="column" style="position: relative;">
+			<img src="{{url_for('.static', filename='remote.png')}}" style="width: 100%; height: auto;">
+ 
+	 	<a id="light"><div style="position: absolute; left: 2%; top: 2%; width: 28%; height: 20%; background-color: rgba(0, 0, 0, .0);"></div></a>
+		<a id="arriba"><div style="position: absolute; left: 33%; top: 2%; width: 31%; height: 36%; background-color: rgba(0, 0, 0, .0);"></div>
+  		<a id="modo"><div style="position: absolute; left: 67%; top: 2%; width: 28%; height: 20%; background-color: rgba(0, 0, 0, .0);"></div></a>
+		
+		<a id="izquierda"><div style="position: absolute; left: 2%; top: 27%; width: 26%; height: 43%; background-color: rgba(0, 0, 0, .0);"></div></a>
+  		<a id="enter"><div style="position: absolute; left: 34%; top: 40%; width: 30%; height: 19%; background-color: rgba(0, 0, 0, .0);"></div></a>
+  		<a id="derecha"><div style="position: absolute; left: 70%; top: 27%; width: 26%; height: 43%; background-color: rgba(0, 0, 0, .0);"></div></a>
+
+		 <a id="reset"><div style="position: absolute; left: 2%; top: 79%; width: 28%; height: 19%; background-color: rgba(0, 0, 0, .0);"></div></a>
+ 		 <a id="abajo"><div style="position: absolute; left: 33%; top: 63%; width: 31%; height: 36%; background-color: rgba(0, 0, 0, .0);"></div></a>
+  		 <a id="cuenta"><div style="position: absolute; left: 67%; top: 79%; width: 28%; height: 19%; background-color: rgba(20, 30, 40, .5);"></div></a>
+	        </div>
+
+		<div class="column">
+			<h3 id="is_connected" style="color:red;">No Conectado</h3>
+			<p> Registro de Eventos: </p> 
+			<div class="textarea">
+			  <textarea id="terminal" rows="15" cols="120" style="padding-left=22px;">...</textarea>			
+			</div> 
+			<div>
+				<audio controls>
+                        	<source src="static/testfile.wav" type="audio/wav"> Your 
+				browser does not support the audio element. 
+				</audio>
+			</div>
+			<script>
+			var x = document.getElementById("demo");
+
+			function getLocation() {
+                          console.log("GET LOCATION")
+			  if (navigator.geolocation) {	
+			    navigator.geolocation.getCurrentPosition(showPosition);
+			  } else { 
+			    x.innerHTML = "Geolocation is not supported by this browser.";
+			  }
+			}
+
+			function showPosition(position) {
+			  x.innerHTML = "Latitude: " + position.coords.latitude + 
+			  "<br>Longitude: " + position.coords.longitude;
+			}
+			</script>
+		</div>
+	</div>
+	<div class="footer">
+		<div class="topnav">
+			<a id="prenode" href="#news">{{previous_item}}</a>
+                	<a id="activenode" href="#about" class="active">{{active}}</a>
+                	<a id="postnode" href="#about">{{next_item}}</a>
+                        <a id="datetime" href="datetime"></a>
+		</div>
+	</div>
+	<script>
+	function myFunction() {
+	  var x = document.getElementById("myTopnav");
+	  if (x.className === "topnav") {
+	    x.className += " responsive";
+	  } else {
+	    x.className = "topnav";
+	  }
+	}
+	</script>
+	<script type="text/javascript">
+		window.onload = function() {
+		  // HTML5/W3C Geolocation
+		    navigator.geolocation.getCurrentPosition(success, error, options);
+		}
+
+
+
+		const options = {
+		  enableHighAccuracy: true,
+		  timeout: 5000,
+		  maximumAge: 0,
+		};
+
+		function success(pos) {
+		  const crd = pos.coords;
+
+             	  console.log("Yourr current position is:");
+		  console.log(`Latitude : ${crd.latitude}`);
+		  console.log(`Longitude: ${crd.longitude}`);
+		  console.log(`More or less ${crd.accuracy} meters.`);
+		}
+
+		function error(err) {
+		  console.warn(`NO SE HA PODIDO OBTENER LA POSICION`);
+		}
+
+
+
+/*		var source = new EventSource("/data_in")
+		source.onmessage = function(event) {
+		const streamdata = JSON.parse(event.data)
+		document.getElementById("prenode").innerHTML = streamdata.prenode
+		document.getElementById("activenode").innerHTML = streamdata.activenode
+		document.getElementById("postnode").innerHTML = streamdata.postnode
+		} */
+	
+		document.addEventListener("DOMContentLoaded",function() {        	
+                        
+			var socket = io.connect(self.location.host)
+        	
+			socket.on("connect", function() {
+				console.log("connect")
+	                	document.getElementById("is_connected").innerHTML="<h3 style='color:MediumSeaGreen;'>Conectado a Blip-A</h3>";
+				document.getElementById("terminal").innerHTML="Esperando instrucciones...";
+                                get_command_output("connect_event")
+               		});
+
+			function get_command_output(event_type) {
+				setTimeout(socket.send(event_type),3000);
+                                console.log(event_type);
+			}
+        	
+        	       	socket.on("init_message", function(data) {
+				init_message = JSON.parse(data);
+				console.log("message");
+				console.log(init_message.data);
+				document.getElementById("terminal").innerHTML=init_message.data;
+                                if (init_message.packet == "terminal");
+					console.log("init terminal event");
+					setTimeout(get_command_output("terminal_event"),3000);
+        	        });
+
+			socket.on("append_message",function(data) {
+				append_message = JSON.parse(data);
+				console.log("append");
+				document.getElementById("terminal").innerHTML+=append_message.data;
+				if (append_message.packet == "terminal");
+					console.log("append terminal event");
+					setTimeout(get_command_output("terminal_event"),3000);
+			});
+
+                        socket.on("timer_message",function(data) {
+                                append_message = JSON.parse(data);
+                                console.log("timer");
+                                document.getElementById("terminal").innerHTML=append_message.data;
+				document.getElementById("terminal").innerHTML="Cuenta Atras Finalizada"
+				/*setTimeout(function() {
+					document.getElementById("terminal").innerHTML="Cuenta Atras Finalizada";
+					},40000);*/
+					
+                        });
+               		socket.on("status_message",function(data) {
+                        	streamdata = JSON.parse(data);
+	                        console.log("status:arrow");
+        	                document.getElementById("prenode").innerHTML = streamdata.data.prenode;
+                	        document.getElementById("activenode").innerHTML = streamdata.data.activenode;
+                        	document.getElementById("postnode").innerHTML = streamdata.data.postnode;
+	                });
+
+			socket.on("latlon_message",function(data) {
+                                streamdata = JSON.parse(data);
+                                console.log("status:latlon");
+                                Lat="Lat: "
+                                Lon="Lon: "   
+                                document.getElementById("Lat").innerHTML = Lat.concat(streamdata.data.prenode)                                
+				document.getElementById("Lon").innerHTML = Lon.concat(streamdata.data.active)                   
+                        });
+
+               
+        		$("#arriba").on("click", function() {
+                		socket.send("arriba");
+	                });
+
+        	        $("#abajo").on("click", function() {
+                	        socket.send("abajo");
+	                });
+
+        	        $("#izquierda").on("click", function() {
+                	        socket.send("izquierda");
+	                });
+
+        	        $("#derecha").on("click", function() {
+                	        socket.send("derecha");
+	                });
+
+        	        $("#reset").on("click", function() {
+                	        socket.send("reset");
+	                });
+
+        	        $("#modo").on("click", function() {
+                	        socket.send("modo");
+	                });
+
+        	        $("#light").on("click", function() {
+                	        socket.send("light");
+	                });
+
+        	        $("#cuenta").on("click", function() {
+                	        socket.send("cuenta");
+	                });
+
+        	        $("#enter").on("click", function() {
+                	        socket.send("enter");
+	                });
+
+		});
+                (function () {
+			  navigator.geolocation.getCurrentPosition(success, error, options);
+		}());
+
+		(function () {
+
+			  var clockElement = document.getElementById( "datetime" );
+
+			  function updateClock ( clock ) {
+                                  let Current_Time = "Current Time: "
+                                  clock = new Date(); 
+				  clock = clock.toString().substring(16,33);
+				  clockElement.innerHTML = Current_Time.concat(clock);
+ 			  }
+
+			  setInterval(function () {
+			      updateClock( clockElement );
+  			}, 1000);
+
+		}());
+/*                       socket.on("message", function(data){
+                       document.getElementById("terminal").innerHTML=data
+                       console.log(data)
+		       });*/
+
+		
+	</script> 
+    </body>
+</html>

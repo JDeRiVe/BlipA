@@ -1,0 +1,145 @@
+<html>
+    <head>
+        <link rel="stylesheet"  type="text/css" href="{{url_for('.static', filename='style.css')}}">
+        {% if title %}
+        <title>{{ title }} - BLIP-A</title>
+        {% else %}
+        <title>BLIP-A</title>
+        {% endif %}
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.1/socket.io.min.js"></script>
+    </head>
+    <body>
+	<div class="topnav" id="myTopnav">
+  		<a href="#home" class="active">BLIP-A</a>
+ 		<a href="#news">Home</a>
+  		<a href="#about">Status: {{Configuracion}}</a>
+                <a href="#about">IP: {{host_ip_address}}</a>
+  		<a href="javascript:void(0);" class="icon" onclick="myFunction()">
+    		<i class="fa fa-bars"></i>
+  		</a>
+	</div>
+	<div class="row">
+		<div class="column" style="position: relative;">
+			<img src="{{url_for('.static', filename='remote.png')}}" style="width: 100%; height: auto;">
+ 
+	 	<a id="light"><div style="position: absolute; left: 2%; top: 2%; width: 28%; height: 20%; background-color: rgba(0, 0, 0, .0);"></div></a>
+		<a id="arriba"><div style="position: absolute; left: 33%; top: 2%; width: 31%; height: 36%; background-color: rgba(0, 0, 0, .0);"></div>
+  		<a id="modo"><div style="position: absolute; left: 67%; top: 2%; width: 28%; height: 20%; background-color: rgba(0, 0, 0, .0);"></div></a>
+		
+		<a id="izquierda"><div style="position: absolute; left: 2%; top: 27%; width: 26%; height: 43%; background-color: rgba(0, 0, 0, .0);"></div></a>
+  		<a id="enter"><div style="position: absolute; left: 34%; top: 40%; width: 30%; height: 19%; background-color: rgba(0, 0, 0, .0);"></div></a>
+  		<a id="derecha"><div style="position: absolute; left: 70%; top: 27%; width: 26%; height: 43%; background-color: rgba(0, 0, 0, .0);"></div></a>
+
+		 <a id="reset"><div style="position: absolute; left: 2%; top: 79%; width: 28%; height: 19%; background-color: rgba(0, 0, 0, .0);"></div></a>
+ 		 <a id="abajo"><div style="position: absolute; left: 33%; top: 63%; width: 31%; height: 36%; background-color: rgba(0, 0, 0, .0);"></div></a>
+  		 <a id="cuenta"><div style="position: absolute; left: 67%; top: 79%; width: 28%; height: 19%; background-color: rgba(20, 30, 40, .5);"></div></a>
+        </div>
+
+		<div class="column">
+			 <h3>Terminal below></h3>
+			 <div id="terminal">
+			
+			</div> 
+		</div>
+	</div>
+	<div class="footer">
+		<div class="topnav">
+			<a id="prenode" href="#news">{{previous_item}}</a>
+                	<a id="activenode" href="#about" class="active">{{active}}</a>
+                	<a id="postnode" href="#about">{{next_item}}</a>
+		</div>
+	</div>
+	<script>
+	function myFunction() {
+	  var x = document.getElementById("myTopnav");
+	  if (x.className === "topnav") {
+	    x.className += " responsive";
+	  } else {
+	    x.className = "topnav";
+	  }
+	}
+	</script>
+	<script type="text/javascript">
+/*		var source = new EventSource("/data_in")
+		source.onmessage = function(event) {
+		const streamdata = JSON.parse(event.data)
+		document.getElementById("prenode").innerHTML = streamdata.prenode
+		document.getElementById("activenode").innerHTML = streamdata.activenode
+		document.getElementById("postnode").innerHTML = streamdata.postnode
+		} */
+	
+		$(document).ready(function() {
+        		var socket = io.connect("http://192.168.1.111:5000")
+        		
+			socket.on("connect", function() {
+                	document.getElementByID("terminal").innerHTML="<h3>User connected</h3>";
+                	});
+        	
+               		socket.on("message", function(data) {
+			streamdata = JSON.parse(data);
+			document.getElementByID("terminal").innerHTML=streamdata.data;
+                	});
+
+			socket.on("append_message",function(data) {
+			streamdata = JSON.parse(data);
+			console.log("append");
+			document.getElementByID("terminal").innerHTML+=streamdata.data;
+			});
+
+                        socket.on("status_message",function(data) {
+                        streamdata = JSON.parse(data);
+                        console.log("status");
+                        document.getElementById("prenode").innerHTML = streamdata.data.prenode;
+                        document.getElementById("activenode").innerHTML = streamdata.data.activenode;
+                        document.getElementById("postnode").innerHTML = streamdata.data.postnode;
+                        });
+
+
+
+        		$("#arriba").on("click", function() {
+                	socket.send("arriba");
+                	});
+
+                        $("#abajo").on("click", function() {
+                        socket.send("abajo");
+                        });
+
+                        $("#izquierda").on("click", function() {
+                        socket.send("izquierda");
+                        });
+
+                        $("#derecha").on("click", function() {
+                        socket.send("derecha");
+                        });
+
+                        $("#reset").on("click", function() {
+                        socket.send("reset");
+                        });
+
+                        $("#modo").on("click", function() {
+                        socket.send("modo");
+                        });
+
+                        $("#light").on("click", function() {
+                        socket.send("light");
+                        });
+
+                        $("#cuenta").on("click", function() {
+                        socket.send("cuenta");
+                        /* document.getElementById("terminal").innerHTML="<h1>Countdown Started</h1>" */
+                        });
+
+                        $("#enter").on("click", function() {
+                        socket.send("enter");
+                        })
+                      
+/*                       socket.on("message", function(data){
+                       document.getElementById("terminal").innerHTML=data
+                       console.log(data)
+		       });*/
+
+		});
+	</script> 
+    </body>
+</html>

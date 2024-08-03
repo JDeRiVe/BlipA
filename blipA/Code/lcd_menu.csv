@@ -1,0 +1,20 @@
+1,Configuracion,go_next
+1.1,Estandar,empty
+1.2,AP,empty
+2,Escucha,go_next
+2.1,Escucha Automatica,go_next
+2.1.1,Radiosonda,empty
+2.1.2,Satelites,empty
+2.1.3,Escaner Manual,empty
+2.1.4,ADS-B (Avion),empty
+2.1.5,ACARS (Avion),empty
+2.1.6,AIS (Barco),empty
+2.1.7,GSM,empty
+2.1.8,LRIT (Barco),empty
+2.1.9,Radio terrestre,go_next
+2.1.9.1,AM,empty
+2.1.9.2,FM,empty
+2.1.10,Train Telemetry,empty
+2.1.11,SSTV,empty
+3,Escucha Manual,go_next
+4,Raspberry Reply,go_next
