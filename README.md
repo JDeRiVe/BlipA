@@ -2,11 +2,10 @@
 This is an ongoing project and I am not maintaining the documentation or having the code well commented (use it at your own risk). 
 The goal is to use an RTL-SDR (software defined radio) and a raspberry-pi 1B to supercharge it with applications to read different radio-signals and be able to operate it with a cellphone or a tablet. In the future, my idea is that the RPi will also have a Moddle server to provide an interactive learning experience, so at some point it can be used as cheap educational resource to teach radio-stuff, electronics. This little thing can be used to downlink pictures from some NOAA satellites (which for kids is awesome and for remote areas without coverage can be used to understand whether clouds or a hurricane is coming)😊
 
-![Screenshot of Blip-A working.]()
-
-
-
-The Rpi is setup in headless mode and gives a flask front-end to call the different functions. I have also attached a LCD (totally retro!) so I can see whether the communication is going well between the front-end and the Rpi.
+The Rpi is setup in headless mode and gives a flask front-end to call the different functions. 
+![Screenshot of Blip-A working.](https://github.com/JDeRiVe/BlipA/blob/main/BlipA_pictures/BlipA_LCDworking.jpg)
+I have also attached a LCD (totally retro!) so I can see whether the communication is going well between the front-end and the Rpi.
+![Screenshot of Blip-A working.](https://github.com/JDeRiVe/BlipA/blob/main/BlipA_pictures/BlipA_LCDworking.jpg)
 Here there are the STL files for the case. There is space for the LCD and another space to get the cables to the GPIO out of the case and keeping the tied to the Rpi.
 
 The (very) messy code for the flask frontend, I implemented a tree class for the menu display in the LCD, so the navigation is simple, where the functions are at the base of the tree.
